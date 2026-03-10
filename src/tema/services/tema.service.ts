@@ -1,62 +1,65 @@
-import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository, ILike, DeleteResult } from "typeorm";
-import { Tema} from "../entities/tema.entity";
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Tema } from '../entities/tema.entity';
+import { DeleteResult, ILike, Repository } from 'typeorm';
 
 @Injectable()
 export class TemaService {
-    
     constructor(
         @InjectRepository(Tema)
         private temaRepository: Repository<Tema>,
-    ){}
+    ) {}
 
     async findAll(): Promise<Tema[]> {
-        return await this.temaRepository.find(); // SELECT * FROM tb_tema
+        return this.temaRepository.find({
+            relations:{
+                postagem: true
+            }
+        });
     }
 
     async findById(id: number): Promise<Tema> {
-        // SELECT * FROM tb_tema WHERE id = ?;
         const tema = await this.temaRepository.findOne({
             where: {
-                id
+                id,
+            },
+            relations:{
+                postagem: true
             }
         });
 
-        if (!tema) {
-            throw new HttpException('Tema não encontrado!', HttpStatus.NOT_FOUND);
-        }
+        if (!tema) throw new HttpException('Tema não encontrado!', HttpStatus.NOT_FOUND);
 
         return tema;
     }
 
     async findAllByDescricao(descricao: string): Promise<Tema[]> {
-        // SELECT * FROM tb_tema WHERE titulo LIKE '%descricao%';
-        return await this.temaRepository.find({
+        return this.temaRepository.find({
             where: {
-                descricao: ILike(`%${descricao}%`) // Busca flexível (ignora case e busca partes do texto)
+                descricao: ILike(`%${descricao}%`),
+            },
+            relations:{
+                postagem: true
             }
         });
     }
 
-    async create(postagem: Tema): Promise<Tema>{
-        //INSERT INTO tb_tema (titulo, texto) VALUES (?, ?);
-        return await this.temaRepository.save(postagem);
+    async create(tema: Tema): Promise<Tema> {
+        return this.temaRepository.save(tema);
     }
 
-    async update(postagem: Tema): Promise<Tema> {
-        if (!postagem.id || postagem.id <= 0)
-            throw new HttpException("O ID do tema é inválido!", HttpStatus.BAD_REQUEST);
+    async update(tema: Tema): Promise<Tema> {
+        if (!tema.id || tema.id <= 0)
+            throw new HttpException('O ID do tema é inválido!', HttpStatus.BAD_REQUEST);
 
-        await this.findById(postagem.id);
+        await this.findById(tema.id);
 
-        return this.temaRepository.save(postagem);
+        return this.temaRepository.save(tema);
     }
 
-    async delete(id: number): Promise<DeleteResult>{
+    async delete(id: number): Promise<DeleteResult> {
         await this.findById(id);
 
-        //DELETE tb_postagens FROM id = ?;
         return this.temaRepository.delete(id);
     }
 }
