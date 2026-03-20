@@ -18,7 +18,8 @@ export class Tema {
     @Column({ length: 255, nullable: false })
     descricao: string;
 
-    @ApiProperty()
-    @OneToMany( () => Postagem, (postagem) => postagem.tema)
-    postagem: Postagem[]; // Array de retorno
+@ApiProperty({ type: () => Postagem })  // ← lazy resolver
+@OneToMany(() => Postagem, (postagem) => postagem.tema)
+postagem: Postagem[];
+
 }

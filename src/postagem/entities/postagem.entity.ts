@@ -31,15 +31,11 @@ export class Postagem {
     @UpdateDateColumn() // Atualiza a data na criação e na atualização
     data: Date; // DATETIME(6)
 
-    @ApiProperty()
-    @ManyToOne( () => Tema, (tema) => tema.postagem, {
-        onDelete: "CASCADE"
-    })
-    tema: Tema; // Representa a Chave Estrangeira
+@ApiProperty({ type: () => Tema })  
+@ManyToOne(() => Tema, (tema) => tema.postagem, { onDelete: 'CASCADE' })
+tema: Tema;
 
-    @ApiProperty()
-    @ManyToOne( () => Usuario, (usuario) => usuario.postagem, {
-        onDelete: "CASCADE"
-    })
-    usuario: Usuario; // Representa a Chave Estrangeira
+@ApiProperty({ type: () => Usuario })   
+@ManyToOne(() => Usuario, (usuario) => usuario.postagem, { onDelete: 'CASCADE' })
+usuario: Usuario;
 }
