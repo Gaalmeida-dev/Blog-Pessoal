@@ -12,20 +12,15 @@ import { LocalStrategy } from "./strategy/local.strategy";
 
 @Module({
     imports: [
-        forwardRef(() => UsuarioModule),
-        PassportModule,
+        UsuarioModule,
+        PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.register({
             secret: jwtConstants.secret,
-            signOptions: { expiresIn: '1h' },
-        })
-    ],
-    providers: [
-        Bcrypt,
-        AuthService,
-        LocalStrategy,
-        JwtStrategy,
+            signOptions: { expiresIn: '24h' },
+        }),
     ],
     controllers: [AuthController],
-    exports: [Bcrypt],
+    providers: [AuthService, LocalStrategy, JwtStrategy, Bcrypt],
+    exports: [AuthService, Bcrypt, JwtModule, PassportModule], 
 })
-export class AuthModule {};
+export class AuthModule {}
